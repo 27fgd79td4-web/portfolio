@@ -46,7 +46,23 @@ to‘g‘ri mos holda o‘tadi.
 - **Oyoq davomi.** Kamera odatda faqat beldan yuqorini ko‘radi. Soya havoda osilib qolmasligi uchun maskaning pastki qatori polgacha asta toraytirib cho‘ziladi (`L` tugmasi bilan yoqiladi yoki o‘chiriladi).
 - **Silliqlash.** Moslashuvchan EMA (One-Euro filtri g‘oyasi) ishlatiladi. Tinch turganingizda kuchli filtr titrashni yo‘qotadi, tez harakatda filtr kuchsizlanadi va kechikish sezilmaydi. Kamera va render alohida oqimlarda ishlaydi, shuning uchun 30 FPS kamera bilan ham render 60 FPS da silliq interpolyatsiya qilinadi.
 
-## 3. O‘rnatish
+## 0. Eng tez yo‘l: bir marta bosib ishga tushirish
+
+Hech narsani qo‘lda o‘rnatish shart emas. Birinchi ishga tushirishda skript virtual
+muhit (`.venv`) yaratadi va barcha kutubxonalarni o‘zi o‘rnatadi (taxminan 1–3 daqiqa).
+Keyingi safar dastur darhol ochiladi.
+
+| Tizim | Nima qilish kerak |
+|---|---|
+| **Windows** | `start_windows.bat` faylini ikki marta bosing. Python bo‘lmasa, `winget` orqali o‘zi o‘rnatishga harakat qiladi |
+| **macOS** | `start_mac.command` faylini ikki marta bosing (birinchi marta: o‘ng tugma → Open) |
+| **Linux** | `./start_mac_linux.sh` |
+
+Parametrlarni ham berish mumkin: `start_windows.bat --demo` yoki `./start_mac_linux.sh --room garaj.jpg`.
+
+Loyihani yuklab olish: GitHub’da **Code → Download ZIP** tugmasini bosing, arxivni oching va `virtual-shadow-projection` papkasiga kiring.
+
+## 3. Qo‘lda o‘rnatish (ixtiyoriy)
 
 ```bash
 # (tavsiya) virtual muhit
@@ -54,7 +70,7 @@ python -m venv .venv
 # Windows:  .venv\Scripts\activate
 # macOS/Linux:  source .venv/bin/activate
 
-pip install opencv-python numpy mediapipe
+pip install opencv-contrib-python numpy mediapipe
 # yoki: pip install -r requirements.txt
 ```
 

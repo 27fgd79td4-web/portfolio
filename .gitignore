@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 .venv/
 shadow_*.png
+.venv/
