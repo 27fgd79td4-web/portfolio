@@ -24,7 +24,7 @@
   h1 { margin: 0 0 6px; font-size: 2rem; }
   p.sub { margin: 0 0 28px; color: var(--muted); text-align: center; }
   input {
-    width: 200px; height: 120px; font-size: 4rem; letter-spacing: .1em; text-align: center; text-transform: uppercase;
+    width: 260px; max-width: 100%; height: 120px; font-size: 4rem; letter-spacing: .1em; text-align: center; text-transform: uppercase;
     border: 2px solid var(--border); border-radius: 20px; background: var(--card); color: var(--text);
     outline: none; transition: border-color .15s;
   }
@@ -53,12 +53,12 @@
 </head>
 <body>
   <h1>Letter Words</h1>
-  <p class="sub">Type 1 or 2 letters and get 3 English words instantly.</p>
+  <p class="sub">Type 1, 2 or 3 letters and get 3 English words instantly.</p>
 
-  <input id="letter" maxlength="3" autocomplete="off" autocapitalize="characters" spellcheck="false" autofocus aria-label="Letters">
+  <input id="letter" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" autofocus aria-label="Letters">
   <div class="results" id="results"></div>
   <button id="more" disabled>Show 3 more</button>
-  <div class="hint">Tip: just press keys A–Z — no need to click. A third letter starts over.</div>
+  <div class="hint">Tip: just press keys A–Z — no need to click. A fourth letter starts over.</div>
 
 <script>
 const WORDS = {
@@ -123,7 +123,7 @@ function pickThree(list) {
 
 function show(prefix) {
   prefix = (prefix || "").toLowerCase();
-  if (!/^[a-z]{1,2}$/.test(prefix)) {
+  if (!/^[a-z]{1,3}$/.test(prefix)) {
     results.innerHTML = prefix ? '<div class="hint">Please type English letters (A–Z).</div>' : "";
     moreBtn.disabled = true;
     current = null;
@@ -149,14 +149,14 @@ function show(prefix) {
 }
 
 function typeLetter(ch) {
-  // Up to 2 letters; a third letter starts a new search.
-  input.value = input.value.length >= 2 ? ch : input.value + ch;
+  // Up to 3 letters; a fourth letter starts a new search.
+  input.value = input.value.length >= 3 ? ch : input.value + ch;
   show(input.value);
 }
 
 input.addEventListener("input", () => {
   let v = input.value.replace(/[^a-zA-Z]/g, "");
-  if (v.length > 2) v = v.slice(-1);
+  if (v.length > 3) v = v.slice(-1);
   input.value = v.toUpperCase();
   show(v);
 });
