@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Letter Words</title>
+<style>
+  :root {
+    --bg: #f6f7fb; --card: #ffffff; --text: #1d2233; --muted: #6b7280;
+    --accent: #4f46e5; --accent-soft: #eef2ff; --border: #e5e7eb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1220; --card: #181c2e; --text: #e8eaf3; --muted: #9aa1b5;
+      --accent: #8b8cff; --accent-soft: #23264a; --border: #2a2f47;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex; flex-direction: column; align-items: center; padding: 40px 16px;
+  }
+  h1 { margin: 0 0 6px; font-size: 2rem; }
+  p.sub { margin: 0 0 28px; color: var(--muted); text-align: center; }
+  input {
+    width: 120px; height: 120px; font-size: 4rem; text-align: center; text-transform: uppercase;
+    border: 2px solid var(--border); border-radius: 20px; background: var(--card); color: var(--text);
+    outline: none; transition: border-color .15s;
+  }
+  input:focus { border-color: var(--accent); }
+  .results { display: grid; gap: 14px; width: 100%; max-width: 520px; margin-top: 28px; }
+  .word {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px 20px; display: flex; align-items: baseline; gap: 14px;
+    animation: pop .25s ease both;
+  }
+  .word:nth-child(2) { animation-delay: .05s; }
+  .word:nth-child(3) { animation-delay: .1s; }
+  .word .n { color: var(--accent); font-weight: 700; }
+  .word .w { font-size: 1.5rem; font-weight: 600; }
+  .word .w b { color: var(--accent); }
+  .word .m { color: var(--muted); margin-left: auto; font-size: .95rem; }
+  @keyframes pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  button {
+    margin-top: 22px; padding: 12px 22px; font-size: 1rem; border: 0; border-radius: 12px;
+    background: var(--accent); color: #fff; cursor: pointer;
+  }
+  button:disabled { opacity: .4; cursor: default; }
+  .hint { color: var(--muted); margin-top: 16px; font-size: .9rem; }
+  @media (max-width: 480px) { .word { flex-wrap: wrap; } .word .m { margin-left: 0; width: 100%; } }
+</style>
+</head>
+<body>
+  <h1>Letter Words</h1>
+  <p class="sub">Type any letter and get 3 English words instantly.</p>
+
+  <input id="letter" maxlength="1" autocomplete="off" autofocus aria-label="Letter">
+  <div class="results" id="results"></div>
+  <button id="more" disabled>Show 3 more</button>
+  <div class="hint">Tip: just press any key A–Z — no need to click.</div>
+
+<script>
+const WORDS = {
+  a: [["Apple","olma"],["Animal","hayvon"],["Airport","aeroport"],["Answer","javob"],["Arm","qo'l"],["Autumn","kuz"],["Angry","jahldor"],["Art","san'at"],["Aunt","xola / amma"],["Adventure","sarguzasht"],["Air","havo"],["Ask","so'ramoq"]],
+  b: [["Book","kitob"],["Ball","to'p"],["Bird","qush"],["Bread","non"],["Brother","aka / uka"],["Beautiful","chiroyli"],["Bridge","ko'prik"],["Blue","ko'k"],["Bag","sumka"],["Bed","karavot"],["Big","katta"],["Buy","sotib olmoq"]],
+  c: [["Cat","mushuk"],["Car","mashina"],["City","shahar"],["Chair","stul"],["Cloud","bulut"],["Color","rang"],["Computer","kompyuter"],["Cold","sovuq"],["Cup","piyola"],["Child","bola"],["Clean","toza"],["Cook","pishirmoq"]],
+  d: [["Dog","it"],["Door","eshik"],["Day","kun"],["Dream","orzu"],["Doctor","shifokor"],["Desk","parta"],["Dance","raqs"],["Dark","qorong'i"],["Duck","o'rdak"],["Drink","ichmoq"],["Dinner","kechki ovqat"],["Daughter","qiz farzand"]],
+  e: [["Egg","tuxum"],["Elephant","fil"],["Earth","yer"],["Eye","ko'z"],["Evening","kechqurun"],["Easy","oson"],["Ear","quloq"],["Eat","yemoq"],["Engine","dvigatel"],["Energy","energiya"],["Empty","bo'sh"],["Exam","imtihon"]],
+  f: [["Fish","baliq"],["Flower","gul"],["Friend","do'st"],["Family","oila"],["Fire","olov"],["Fast","tez"],["Forest","o'rmon"],["Food","ovqat"],["Father","ota"],["Fruit","meva"],["Funny","kulgili"],["Fly","uchmoq"]],
+  g: [["Garden","bog'"],["Girl","qiz"],["Green","yashil"],["Game","o'yin"],["Gift","sovg'a"],["Glass","stakan / shisha"],["Gold","oltin"],["Good","yaxshi"],["Grape","uzum"],["Grass","o't"],["Go","bormoq"],["Guitar","gitara"]],
+  h: [["House","uy"],["Horse","ot"],["Hand","qo'l"],["Happy","baxtli"],["Heart","yurak"],["Hat","shapka"],["Hot","issiq"],["Honey","asal"],["Hospital","kasalxona"],["Holiday","bayram"],["Head","bosh"],["Help","yordam"]],
+  i: [["Ice","muz"],["Island","orol"],["Idea","g'oya"],["Ink","siyoh"],["Insect","hasharot"],["Important","muhim"],["Iron","temir"],["Interesting","qiziqarli"],["Invite","taklif qilmoq"],["Internet","internet"],["Ill","kasal"],["Image","rasm"]],
+  j: [["Juice","sharbat"],["Job","ish"],["Jacket","kurtka"],["Joy","quvonch"],["Jump","sakramoq"],["Journey","sayohat"],["Jam","murabbo"],["Joke","hazil"],["Jungle","changalzor"],["July","iyul"],["June","iyun"],["Judge","sudya"]],
+  k: [["Key","kalit"],["King","qirol"],["Kitchen","oshxona"],["Kind","mehribon"],["Kite","varrak"],["Knife","pichoq"],["Kid","bola"],["Knee","tizza"],["Kiss","o'pich"],["Know","bilmoq"],["Kettle","choynak"],["Kilogram","kilogramm"]],
+  l: [["Lion","sher"],["Lamp","chiroq"],["Leaf","barg"],["Love","sevgi"],["Light","yorug'lik"],["Lake","ko'l"],["Lemon","limon"],["Letter","xat / harf"],["Long","uzun"],["Learn","o'rganmoq"],["Lunch","tushlik"],["Life","hayot"]],
+  m: [["Moon","oy"],["Mother","ona"],["Milk","sut"],["Money","pul"],["Mountain","tog'"],["Music","musiqa"],["Morning","ertalab"],["Market","bozor"],["Mouse","sichqon"],["Map","xarita"],["Meat","go'sht"],["Mirror","oyna"]],
+  n: [["Night","tun"],["Nose","burun"],["Name","ism"],["New","yangi"],["Number","raqam"],["Nature","tabiat"],["Neighbor","qo'shni"],["Nurse","hamshira"],["Nut","yong'oq"],["Notebook","daftar"],["Nice","yoqimli"],["Noise","shovqin"]],
+  o: [["Orange","apelsin"],["Ocean","okean"],["Old","eski / qari"],["Onion","piyoz"],["Office","ofis"],["Owl","boyo'g'li"],["Open","ochmoq"],["Oil","yog'"],["Order","buyurtma"],["Oven","pech"],["Olive","zaytun"],["Orchestra","orkestr"]],
+  p: [["Pen","ruchka"],["Park","bog'"],["Pencil","qalam"],["Picture","rasm"],["Peace","tinchlik"],["Phone","telefon"],["Pear","nok"],["Pink","pushti"],["Plane","samolyot"],["Pocket","cho'ntak"],["Play","o'ynamoq"],["People","odamlar"]],
+  q: [["Queen","qirolicha"],["Question","savol"],["Quick","tez"],["Quiet","jim"],["Quilt","ko'rpa"],["Quality","sifat"],["Quarter","chorak"],["Queue","navbat"],["Quiz","viktorina"],["Quote","iqtibos"],["Quit","tashlamoq"],["Quantity","miqdor"]],
+  r: [["Rain","yomg'ir"],["River","daryo"],["Red","qizil"],["Rabbit","quyon"],["Road","yo'l"],["Room","xona"],["Rose","atirgul"],["Rice","guruch"],["Ring","uzuk"],["Read","o'qimoq"],["Rich","boy"],["Rock","tosh"]],
+  s: [["Sun","quyosh"],["Sea","dengiz"],["School","maktab"],["Star","yulduz"],["Sister","opa / singil"],["Snow","qor"],["Shoe","oyoq kiyim"],["Smile","tabassum"],["Summer","yoz"],["Sugar","shakar"],["Sleep","uxlamoq"],["Strong","kuchli"]],
+  t: [["Tree","daraxt"],["Table","stol"],["Teacher","o'qituvchi"],["Time","vaqt"],["Tiger","yo'lbars"],["Tea","choy"],["Train","poyezd"],["Tomato","pomidor"],["Town","shaharcha"],["Tall","baland"],["Thank","rahmat aytmoq"],["Tooth","tish"]],
+  u: [["Umbrella","soyabon"],["Uncle","amaki / tog'a"],["Up","yuqoriga"],["Under","ostida"],["Uniform","forma"],["University","universitet"],["Useful","foydali"],["Unit","birlik"],["Universe","koinot"],["Ugly","xunuk"],["Understand","tushunmoq"],["Use","foydalanmoq"]],
+  v: [["Village","qishloq"],["Voice","ovoz"],["Vegetable","sabzavot"],["Violin","skripka"],["Visit","tashrif"],["Volcano","vulqon"],["Vase","guldon"],["Very","juda"],["Valley","vodiy"],["View","manzara"],["Victory","g'alaba"],["Van","furgon"]],
+  w: [["Water","suv"],["Window","deraza"],["Wind","shamol"],["World","dunyo"],["Winter","qish"],["White","oq"],["Wolf","bo'ri"],["Watch","soat"],["Wall","devor"],["Warm","iliq"],["Write","yozmoq"],["Week","hafta"]],
+  x: [["X-ray","rentgen"],["Xylophone","ksilofon"],["Xenon","ksenon"],["Xerox","nusxa ko'chirmoq"],["Xmas","Rojdestvo"],["Xenophobia","ksenofobiya"]],
+  y: [["Yellow","sariq"],["Year","yil"],["Yes","ha"],["Young","yosh"],["Yard","hovli"],["Yogurt","yogurt"],["Yesterday","kecha"],["You","sen / siz"],["Yawn","esnamoq"],["Yacht","yaxta"],["Yolk","sarig'i"],["Youth","yoshlik"]],
+  z: [["Zoo","hayvonot bog'i"],["Zebra","zebra"],["Zero","nol"],["Zip","zamok (molniya)"],["Zone","hudud"],["Zigzag","ilon izi"],["Zucchini","qovoqcha"],["Zest","shijoat"],["Zoom","kattalashtirish"],["Zeal","g'ayrat"],["Zipper","molniya"],["Zinc","rux"]]
+};
+
+const input = document.getElementById("letter");
+const results = document.getElementById("results");
+const moreBtn = document.getElementById("more");
+let current = null;
+let lastShown = [];
+
+function pickThree(list) {
+  // Prefer words not shown last time so "Show 3 more" really changes things.
+  const fresh = list.filter(w => !lastShown.includes(w[0]));
+  const pool = (fresh.length >= 3 ? fresh : list).slice();
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, 3);
+}
+
+function show(letter) {
+  letter = (letter || "").toLowerCase();
+  if (!WORDS[letter]) {
+    results.innerHTML = letter ? '<div class="hint">Please type an English letter (A–Z).</div>' : "";
+    moreBtn.disabled = true;
+    current = null;
+    return;
+  }
+  if (letter !== current) lastShown = [];
+  current = letter;
+  const three = pickThree(WORDS[letter]);
+  lastShown = three.map(w => w[0]);
+  results.innerHTML = three.map(([word, meaning], i) =>
+    `<div class="word"><span class="n">${i + 1}.</span>` +
+    `<span class="w"><b>${word[0]}</b>${word.slice(1)}</span>` +
+    `<span class="m">${meaning}</span></div>`
+  ).join("");
+  moreBtn.disabled = false;
+}
+
+input.addEventListener("input", () => {
+  input.value = input.value.slice(-1);
+  show(input.value);
+});
+moreBtn.addEventListener("click", () => show(current));
+
+// Pressing a letter anywhere on the page works too.
+document.addEventListener("keydown", e => {
+  if (e.target === input || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (/^[a-zA-Z]$/.test(e.key)) { input.value = e.key; show(e.key); input.focus(); e.preventDefault(); }
+  else if (e.key === " " || e.key === "Enter") { if (current) { show(current); e.preventDefault(); } }
+});
+</script>
+</body>
+</html>
